@@ -2,7 +2,6 @@ import random
 
 CordX = 0
 CordY = 0
-local = [CordX, CordY]
 
 def OndeEstou(Cord, passos):
     print("Você esta em: "+ str(Cord[0])+ ", "+ str(Cord[1])+ "\nAinda resta: "+ str(passos)+ " passo(s)")
@@ -27,6 +26,13 @@ def Saidas(entrada=1):
     return saidas
 
 
+def criarSala(jogador):
+    sala = SALA([CordX, CordY], Saidas(validaEntrada(jogador.getUltimoMov())))
+    jogador.adicionaTrajeto(sala)
+    return sala
+
+
+
 class SALA():
     def __init__(self, local, caminhos):
         self.cordenada = local
@@ -46,21 +52,21 @@ class SALA():
 
     def JogadorEscolhe(self,texto):
         direc = input(texto)
-        global local
+        global CordX, CordY
         if direc == '1' and self.caminhos[0]:
-            local[1] += 1
+            CordY += 1
             print("Você foi pro Norte")
             return 1
         elif direc == '2' and self.caminhos[1]:
-            local[1] -= 1
+            CordY -= 1
             print("Você foi pro Sul")
             return 2
         elif direc == '3' and self.caminhos[2]:
-            local[0] += 1
+            CordX += 1
             print("Você foi pro Leste")
             return 3
         elif direc == '4' and self.caminhos[3]:
-            local[0] -= 1
+            CordX -= 1
             print("Você foi pro Oeste")
             return 4
         else:
@@ -80,21 +86,36 @@ class JOGADOR():
     def getUltimoMov(self):
         return self.ultimoMov
 
+    def adicionaTrajeto(self,sala):
+        self.trajeto.append(sala)
+
+    def verificaSalaExiste(self,local, jogador):
+        for sala in self.trajeto:
+            if sala.cordenada == local :
+                return sala
+        return criarSala(jogador)
+
 ##############################################################################################################
 
 jogador = JOGADOR()
 passos = 5
 while passos > 0:
-    sala1 = SALA(local, Saidas(validaEntrada(jogador.getUltimoMov())))
+    local = [CordX, CordY]
+    sala = jogador.verificaSalaExiste(local,jogador)
     OndeEstou(local,passos)
     moveu = False
     while moveu != True:
-        jogador.setUltimoMov(sala1.JogadorEscolhe(sala1.MostraOpc(sala1.caminhos)))
+        jogador.setUltimoMov(sala.JogadorEscolhe(sala.MostraOpc(sala.caminhos)))
         if jogador.getUltimoMov() != -1:
             passos -= 1
             moveu = True
 
 
+trajetos = "Você passou por:\n"
+for sala in jogador.trajeto:
+    trajetos += "sala "+str(sala.cordenada)+"\n"
+
+print(trajetos)
 print("GAME OVER")
 
 #print(sala1.MostraOpc(sala1.caminhos))
